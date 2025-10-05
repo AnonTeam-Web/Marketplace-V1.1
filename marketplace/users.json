@@ -1,0 +1,14 @@
+{
+    "Anon": {
+        "password": "scrypt:32768:8:1$2SsKfwZi3crzMwtV$8dac81c1312615015040ddcf927e6563c5cb6b03fd051bb43eece32a4f711cf73d964e319a223dc772ee6c0c5100d012485e7373e4b9d977166e3ffcbebd6f5f",
+        "email": "2026.anon@gmail.com",
+        "role": "team",
+        "credits": 100
+    },
+    "Gattaca": {
+        "password": "scrypt:32768:8:1$TZBctKqs2BDZMIwC$aa770976ef5437256bc2c4e1a494e04ba8fe2d4b1c8fde77665f427e7c51552fc28d9012d3216e431a12b61ca543d4881dd6b9e73cf08634bf9e8926fe7798d5",
+        "email": "gattaca@example.com",
+        "role": "team",
+        "credits": 100
+    }
+}
