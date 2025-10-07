@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash 
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from datetime import datetime
@@ -251,3 +251,4 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()  # Crée les tables si inexistantes
     app.run(debug=True)
+
