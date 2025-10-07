@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash 
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from datetime import datetime
@@ -24,6 +24,8 @@ allowed_usernames = ["Anon", "Gattaca", "PlaneteRouge", "Zone51", "BLR"]
 # 🗂️ Modèles de base de données
 # ---------------------------------------------------------
 class User(db.Model):
+    __tablename__ = "users"  # Évite le mot réservé PostgreSQL
+
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
@@ -42,7 +44,7 @@ class Mission(db.Model):
     date_butoir = db.Column(db.String(50), nullable=False)
     quantity = db.Column(db.Integer, default=1)
     type = db.Column(db.String(50))
-    vendeur_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    vendeur_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
     offres = db.relationship("Offer", backref="mission", lazy=True, cascade="all, delete")
 
@@ -51,7 +53,7 @@ class Offer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     prix = db.Column(db.Float, nullable=False)
     accepted = db.Column(db.Boolean, default=False)
-    acheteur_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    acheteur_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     mission_id = db.Column(db.Integer, db.ForeignKey("mission.id"), nullable=False)
 
 # ---------------------------------------------------------
@@ -249,7 +251,5 @@ def delete_offer(mission_id):
 # ---------------------------------------------------------
 if __name__ == "__main__":
     with app.app_context():
-        # ✅ Crée toutes les tables si elles n'existent pas déjà
-        db.create_all()
+        db.create_all()  # Crée les tables si inexistantes
     app.run(debug=True)
-
