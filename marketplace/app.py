@@ -12,7 +12,10 @@ app = Flask(__name__)
 app.secret_key = "clef_secrete_pour_session"
 
 # Configuration base de données : locale (SQLite) ou Render (PostgreSQL)
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///local.db")
+uri = os.environ.get("DATABASE_URL", "sqlite:///local.db")
+if uri.startswith("postgres://"):
+    uri = uri.replace("postgres://", "postgresql://", 1)
+app.config["SQLALCHEMY_DATABASE_URI"] = uri
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
