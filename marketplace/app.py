@@ -1,7 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash 
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 import os
 
@@ -12,10 +11,7 @@ app = Flask(__name__)
 app.secret_key = "clef_secrete_pour_session"
 
 # Configuration base de données : locale (SQLite) ou Render (PostgreSQL)
-uri = os.environ.get("DATABASE_URL", "sqlite:///local.db")
-if uri.startswith("postgres://"):
-    uri = uri.replace("postgres://", "postgresql://", 1)
-app.config["SQLALCHEMY_DATABASE_URI"] = uri
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///local.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
@@ -27,8 +23,7 @@ allowed_usernames = ["Anon", "Gattaca", "PlaneteRouge", "Zone51", "BLR"]
 # 🗂️ Modèles de base de données
 # ---------------------------------------------------------
 class User(db.Model):
-    __tablename__ = "users"  # Évite le mot réservé PostgreSQL
-
+    __tablename__ = "users"  # ✅ Correction explicite
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
@@ -40,6 +35,7 @@ class User(db.Model):
 
 
 class Mission(db.Model):
+    __tablename__ = "missions"  # ✅ Correction explicite
     id = db.Column(db.Integer, primary_key=True)
     titre = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=False)
@@ -53,11 +49,12 @@ class Mission(db.Model):
 
 
 class Offer(db.Model):
+    __tablename__ = "offers"  # ✅ Correction explicite
     id = db.Column(db.Integer, primary_key=True)
     prix = db.Column(db.Float, nullable=False)
     accepted = db.Column(db.Boolean, default=False)
     acheteur_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
-    mission_id = db.Column(db.Integer, db.ForeignKey("mission.id"), nullable=False)
+    mission_id = db.Column(db.Integer, db.ForeignKey("missions.id"), nullable=False)
 
 # ---------------------------------------------------------
 # 🧩 Décorateurs et contextes
@@ -233,8 +230,7 @@ def accept_offer(mission_id):
     return redirect(url_for("mission_detail", mission_id=mission_id))
 
 
-# ✅ Suppression d'une offre par son auteur
-@app.route('/delete_offer/<int:mission_id>', methods=['POST'])
+@app.route("/delete_offer/<int:mission_id>", methods=["POST"])
 @login_required
 def delete_offer(mission_id):
     user = User.query.filter_by(username=session["user"]).first()
@@ -248,11 +244,11 @@ def delete_offer(mission_id):
 
     return redirect(url_for("mission_detail", mission_id=mission_id))
 
-
 # ---------------------------------------------------------
 # 🚀 Lancement
 # ---------------------------------------------------------
 if __name__ == "__main__":
     with app.app_context():
-        db.create_all()  # Crée les tables si inexistantes
+        db.create_all()
     app.run(debug=True)
+
