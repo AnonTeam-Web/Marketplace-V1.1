@@ -23,13 +23,13 @@
       <div class="card-body">
         <h3 class="card-title">{{ mission.titre }}</h3>
 
-        <!-- Pictogramme dynamique -->
         {% set type_icon = {
-             'information': 'bi-info-circle',
+             'donnee': 'bi-file-earmark-text',
              'carte': 'bi-map',
              'mission': 'bi-flag',
              'option': 'bi-lightbulb'
            } %}
+
         <div class="mb-2">
           <span class="badge-type">
             <i class="bi {{ type_icon.get(mission.type, 'bi-question-circle') }} icon-type"></i>
@@ -42,6 +42,12 @@
 
         <div class="mb-3">
           <div class="price">Prix demandé : {{ mission.prix }} crédits</div>
+          {% if mission.prix_achat is defined and mission.prix_achat is not none %}
+            <div>Prix d'achat : <strong>{{ mission.prix_achat }} crédits</strong></div>
+          {% endif %}
+          {% if mission.data_label %}
+            <div>Label de donnée : <strong>{{ mission.data_label }}</strong></div>
+          {% endif %}
           <div>Vendeur : <strong>{{ mission.vendeur }}</strong></div>
           {% if mission.date_butoir %}
             <div>Fin de vente : <strong>{{ mission.date_butoir[:10] }}</strong></div>
@@ -60,7 +66,6 @@
                   {% endif %}
                 </div>
 
-                <!-- Actions selon le rôle -->
                 <div class="d-flex gap-1">
                   {% if session.get('user') == mission.vendeur and not offre.accepted %}
                     <form method="POST" action="{{ url_for('accept_offer', mission_id=mission.id) }}" style="display:inline">
