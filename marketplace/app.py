@@ -375,10 +375,45 @@ def delete_offer(mission_id):
 # ---------------------------------------------------------
 # Page légales (CGV/CGU/RGPD)
 # ---------------------------------------------------------
+
 @app.route("/legal")
 def legal():
     # Crée une page simple — personnalise le template 'legal.html'
     return render_template("legal.html")
+@app.route('/upgrade_db')
+def upgrade_db():
+    from sqlalchemy import text
+    try:
+        with db.engine.connect() as conn:
+            # Ajoute colonne prix_achat
+            conn.execute(text("""
+                ALTER TABLE missions ADD COLUMN IF NOT EXISTS prix_achat NUMERIC;
+            """))
+            # Ajoute colonne data_label
+            conn.execute(text("""
+                ALTER TABLE missions ADD COLUMN IF NOT EXISTS data_label VARCHAR(50);
+            """))
+        return "✅ Colonnes ajoutées ou déjà présentes (Render compatible)."
+    except Exception as e:
+        return f"❌ Erreur lors de la mise à niveau : {e}"
+
+@app.route('/upgrade_db')
+def upgrade_db():
+    from sqlalchemy import text
+    try:
+        with db.engine.connect() as conn:
+            # Ajoute colonne prix_achat
+            conn.execute(text("""
+                ALTER TABLE missions ADD COLUMN IF NOT EXISTS prix_achat NUMERIC;
+            """))
+            # Ajoute colonne data_label
+            conn.execute(text("""
+                ALTER TABLE missions ADD COLUMN IF NOT EXISTS data_label VARCHAR(50);
+            """))
+        return "✅ Colonnes ajoutées ou déjà présentes (Render compatible)."
+    except Exception as e:
+        return f"❌ Erreur lors de la mise à niveau : {e}"
+
 
 # ---------------------------------------------------------
 # Lancement
@@ -387,4 +422,5 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
     app.run(debug=True)
+
 
