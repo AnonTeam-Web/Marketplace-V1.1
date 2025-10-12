@@ -380,30 +380,6 @@ def legal():
     # Crée une page simple — personnalise le template 'legal.html'
     return render_template("legal.html")
 
-
-# ---------------------------------------------------------
-# Route utilitaire : upgrade DB (ajout de colonnes si manquantes)
-# ---------------------------------------------------------
-@app.route("/upgrade_db")
-def upgrade_db():
-    # Ne pas exposer en production sans protection — supprimer après usage
-    from sqlalchemy import inspect, text
-    inspector = inspect(db.engine)
-
-    # vérif tables
-    if "missions" not in inspector.get_table_names():
-        db.create_all()
-        return "DB: tables créées."
-
-    # ajout colonne prix_achat, data_label si manquantes
-    cols = [c["name"] for c in inspector.get_columns("missions")]
-    with db.engine.connect() as conn:
-        if "prix_achat" not in cols:
-            conn.execute(text("ALTER TABLE missions ADD COLUMN prix_achat FLOAT"))
-        if "data_label" not in cols:
-            conn.execute(text("ALTER TABLE missions ADD COLUMN data_label VARCHAR"))
-    return "DB upgrade completed."
-
 # ---------------------------------------------------------
 # Lancement
 # ---------------------------------------------------------
@@ -411,3 +387,4 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
     app.run(debug=True)
+
