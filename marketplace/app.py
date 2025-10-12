@@ -247,8 +247,12 @@ def delete_offer(mission_id):
 # ---------------------------------------------------------
 # 🚀 Lancement
 # ---------------------------------------------------------
+with app.app_context():
+    db.create_all()  # crée automatiquement les tables sur Render
+    print("✅ Tables créées sur la base Render (si elles n’existaient pas).")
+
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)
+
+
 
