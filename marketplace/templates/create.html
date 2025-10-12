@@ -11,6 +11,7 @@
     .container { max-width: 600px; margin-top: 50px; }
     .form-label { font-weight: 600; }
     .icon-type { font-size: 1.5rem; margin-left: 8px; vertical-align: middle; }
+    .donnee-fields { display: none; }
   </style>
 </head>
 <body>
@@ -38,7 +39,7 @@
 
       <div class="mb-3">
         <label class="form-label" for="prix">Prix (en crédits)</label>
-        <input type="number" class="form-control" id="prix" name="prix" min="1" required>
+        <input type="number" class="form-control" id="prix" name="prix" min="0" step="0.01" required>
       </div>
 
       <div class="mb-3">
@@ -53,12 +54,30 @@
       <div class="mb-3 d-flex align-items-center">
         <label class="form-label me-2" for="type">Type de produit</label>
         <select class="form-select" id="type" name="type" style="width:auto;">
-          <option value="information">Information</option>
+          <!-- IMPORTANT: value 'donnee' must match app.py logic (anciennement 'information') -->
+          <option value="donnee">Donnée (information)</option>
           <option value="carte">Carte</option>
           <option value="mission">Mission</option>
           <option value="option">Solution / Option</option>
         </select>
-        <i id="type-icon" class="bi bi-info-circle icon-type"></i>
+        <i id="type-icon" class="bi bi-file-earmark-text icon-type"></i>
+      </div>
+
+      <div id="donnee-fields" class="donnee-fields">
+        <div class="mb-3">
+          <label class="form-label" for="prix_achat">Prix d'achat (en crédits)</label>
+          <input type="number" class="form-control" id="prix_achat" name="prix_achat" min="0" step="0.01">
+          <div class="form-text">Obligatoire pour le type <strong>Donnée</strong>.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="data_label">Label des données</label>
+          <select class="form-select" id="data_label" name="data_label">
+            <option value="U">U</option>
+            <option value="non_classifie">non_classifie</option>
+          </select>
+          <div class="form-text">Choisir 'U' ou 'non_classifie'. Certains contrôles de prix s'appliquent selon le label.</div>
+        </div>
       </div>
 
       <div class="mb-3">
@@ -79,17 +98,42 @@
   <script>
     const typeSelect = document.getElementById('type');
     const typeIcon = document.getElementById('type-icon');
+    const donneeFields = document.getElementById('donnee-fields');
+    const prixAchatInput = document.getElementById('prix_achat');
+    const dataLabelSelect = document.getElementById('data_label');
 
     const icons = {
-      'information': 'bi-info-circle',
+      'donnee': 'bi-file-earmark-text',
       'carte': 'bi-map',
       'mission': 'bi-flag',
       'option': 'bi-lightbulb'
     };
 
-    typeSelect.addEventListener('change', () => {
+    function updateTypeUI() {
       const selected = typeSelect.value;
+      // icon
       typeIcon.className = 'bi ' + (icons[selected] || 'bi-question-circle') + ' icon-type';
+
+      // show/hide donnee fields
+      if (selected === 'donnee') {
+        donneeFields.style.display = 'block';
+        prixAchatInput.required = true;
+        dataLabelSelect.required = true;
+      } else {
+        donneeFields.style.display = 'none';
+        prixAchatInput.required = false;
+        dataLabelSelect.required = false;
+        // clear values to avoid accidental submission
+        prixAchatInput.value = '';
+        dataLabelSelect.selectedIndex = 0;
+      }
+    }
+
+    typeSelect.addEventListener('change', updateTypeUI);
+
+    // initial state
+    document.addEventListener('DOMContentLoaded', () => {
+      updateTypeUI();
     });
   </script>
 
