@@ -244,6 +244,14 @@ def delete_offer(mission_id):
 
     return redirect(url_for("mission_detail", mission_id=mission_id))
 
+@app.route("/reset_db")
+def reset_db():
+    from app import db
+    db.drop_all()
+    db.create_all()
+    return "✅ Database reset successful!"
+
+
 # ---------------------------------------------------------
 # 🚀 Lancement
 # ---------------------------------------------------------
@@ -253,6 +261,7 @@ with app.app_context():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
 
 
