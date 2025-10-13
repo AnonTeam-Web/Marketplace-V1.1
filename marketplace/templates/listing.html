@@ -1,79 +1,166 @@
-{% extends "base.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Marketplace - Listing</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body { background-color: #f4f7fb; }
+    header.site-header {
+      background: linear-gradient(90deg, #0d6efd 0%, #3fa9ff 100%);
+      color: #fff;
+      padding: 28px 0;
+      margin-bottom: 24px;
+    }
+    .card-market {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(16, 52, 166, 0.08);
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .card-market:hover { transform: translateY(-6px); box-shadow: 0 12px 28px rgba(16,52,166,0.12); }
+    .badge-type {
+      background: rgba(13,110,253,0.08);
+      color: #0d6efd;
+      font-weight: 600;
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: .85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .price { color: #0d6efd; font-weight: 700; font-size: 1.05rem; }
+    .small-muted { color: #6c7a89; font-size: .9rem; }
+    .card-img-top {
+      object-fit: contain;
+      height: 180px;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f8f9fa;
+    }
+    .seller-pill { font-size: .85rem; color:#486582; }
+    .icon-type { font-size: 4rem; color:#0d6efd; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container d-flex align-items-center justify-content-between">
+      <div>
+        <h1 class="h3 mb-0">Marketplace interne</h1>
+        <div class="small">Achetez / vendez des missions, cartes, informations et solutions</div>
+      </div>
+      <div class="text-end">
+        {% if session.get('user') %}
+          <div class="small-muted mb-1">Connecté en tant que <strong>{{ session['user'] }}</strong></div>
+          <a href="{{ url_for('create') }}" class="btn btn-light btn-sm me-2">Créer une annonce</a>
+          <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">Déconnexion</a>
+        {% else %}
+          <a href="{{ url_for('login') }}" class="btn btn-light btn-sm">Connexion</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
 
-<div class="container mt-4">
-  <h2 class="mb-3 text-center">Marketplace : missions, offres et données</h2>
+  <main class="container mb-5">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} text-center">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
 
-  {% if missions %}
-    <div class="row">
-      {% for mission in missions %}
-        <div class="col-md-4 mb-4">
-          <div class="card shadow-sm border-0 h-100">
-            <div class="card-body">
-              <h5 class="card-title text-primary">
-                {% if mission.type == 'mission' %}
-                  <i class="bi bi-briefcase-fill me-1"></i> Mission
-                {% elif mission.type == 'offre' %}
-                  <i class="bi bi-cash-stack me-1"></i> Offre
-                {% elif mission.type == 'donnee' %}
-                  <i class="bi bi-file-earmark-text me-1"></i> Donnée
-                {% endif %}
-                {{ mission.titre }}
-              </h5>
+    <div class="row g-4">
+      {% if missions %}
+        {% for mission in missions %}
+          <div class="col-12 col-md-6 col-xl-4">
+            <div class="card card-market h-100">
+              {% set type_icon = {
+                   'information': 'bi-exclamation-circle',
+                   'carte': 'bi-map',
+                   'mission': 'bi-flag',
+                   'option': 'bi-lightbulb'
+                 } %}
+              <div class="card-img-top">
+                <i class="bi {{ type_icon.get(mission.type, 'bi-question-circle') }} icon-type"></i>
+              </div>
 
-              {% if mission.description %}
-                <p class="card-text text-muted small">{{ mission.description[:150] }}{% if mission.description|length > 150 %}...{% endif %}</p>
-              {% endif %}
+              <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <span class="badge-type">
+                    <i class="bi {{ type_icon.get(mission.type, 'bi-question-circle') }}"></i> {{ mission.type }}
+                  </span>
+                  <small class="small-muted">Qté: <strong>{{ mission.quantity }}</strong></small>
+                </div>
 
-              <ul class="list-unstyled mb-3">
-                {% if mission.data_label %}
-                  <li><i class="bi bi-tag me-1"></i> Catégorie : {{ mission.data_label }}</li>
-                {% endif %}
-                {% if mission.date_butoir %}
-                  <li><i class="bi bi-calendar-event me-1"></i> Date butoir : {{ mission.date_butoir.strftime('%d/%m/%Y') }}</li>
-                {% endif %}
-                {% if mission.quantity %}
-                  <li><i class="bi bi-box-seam me-1"></i> Quantité : {{ mission.quantity }}</li>
-                {% endif %}
+                <h5 class="card-title mb-1">{{ mission.titre }}</h5>
+                <p class="small-muted mb-2" style="min-height:3.2rem;">
+                  {{ mission.description[:100] ~ (mission.description|length > 100 and '…' or '') }}
+                </p>
 
-                {% if mission.type == 'donnee' %}
-                  {% if mission.prix_achat %}
-                    <li><i class="bi bi-currency-euro me-1"></i> Prix d’achat : {{ mission.prix_achat }} €</li>
-                  {% endif %}
-                {% else %}
-                  {% if mission.prix %}
-                    <li><i class="bi bi-coin me-1"></i> Prix : {{ mission.prix }} crédits</li>
-                  {% endif %}
-                {% endif %}
-              </ul>
-
-              {% if mission.offres %}
-                {% set best = None %}
-                {% for o in mission.offres %}
-                  {% if not best or o.prix > best.prix %}
-                    {% set best = o %}
-                  {% endif %}
-                {% endfor %}
-                {% if best %}
-                  <div class="alert alert-success py-2 small mb-3">
-                    <i class="bi bi-trophy-fill me-1"></i> Meilleure offre : {{ best.prix }} crédits ({{ best.vendeur_id }})
+                <div class="mt-auto">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                      <div class="price">{{ mission.prix }} crédits</div>
+                      <div class="small-muted">Vendeur <span class="seller-pill">{{ mission.vendeur }}</span></div>
+                    </div>
+                    <div class="text-end small-muted">
+                      {% if mission.date_butoir %}
+                        {% set db = mission.date_butoir[:10] %}
+                        <div>Fin : <strong>{{ db }}</strong></div>
+                      {% endif %}
+                    </div>
                   </div>
-                {% endif %}
-              {% endif %}
 
-              <a href="{{ url_for('mission_detail', id=mission.id) }}" class="btn btn-sm btn-outline-primary">
-                Voir le détail
-              </a>
+                  {% set best = None %}
+                  {% if mission.get('offres') %}
+                    {% for o in mission.offres %}
+                      {% if not best or o.prix > best.prix %}
+                        {% set best = o %}
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
+
+                  {% if best %}
+                    <div class="mb-2 small-muted">Meilleure offre : <strong>{{ best.prix }} crédits</strong> par <em>{{ best.user }}</em></div>
+                  {% endif %}
+
+                  <div class="d-flex gap-2">
+                    <a href="{{ url_for('mission_detail', mission_id=mission.id) }}" class="btn btn-primary btn-sm">Détails</a>
+
+                    {% if session.get('user') and session['user'] != mission.vendeur %}
+                      <a href="{{ url_for('mission_detail', mission_id=mission.id) }}" class="btn btn-outline-primary btn-sm">Faire une offre</a>
+                    {% endif %}
+
+                    {% if session.get('user') and session['user'] == mission.vendeur and best %}
+                      <form method="POST" action="{{ url_for('buy_mission', mission_id=mission.id) }}" style="display:inline;">
+                        <button type="submit" class="btn btn-success btn-sm">Vendre maintenant</button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+        {% endfor %}
+      {% else %}
+        <div class="col-12">
+          <div class="alert alert-info">Aucune annonce disponible pour l'instant.</div>
         </div>
-      {% endfor %}
+      {% endif %}
     </div>
+  </main>
 
-  {% else %}
-    <div class="alert alert-info text-center mt-4">
-      Aucune mission, offre ou donnée disponible pour le moment.
-    </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
   {% endif %}
 </div>
 
