@@ -118,14 +118,16 @@
                     </div>
                   </div>
 
-                  {% set best = None %}
-                  {% if mission.get('offres') %}
-                    {% for o in mission.offres %}
-                      {% if not best or o.prix > best.prix %}
-                        {% set best = o %}
-                      {% endif %}
-                    {% endfor %}
-                  {% endif %}
+{% set best = None %}
+{% if mission.offres %}
+  {% for o in mission.offres %}
+    {% if not best or o.prix > best.prix %}
+      {% set best = o %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+
 
                   {% if best %}
                     <div class="mb-2 small-muted">Meilleure offre : <strong>{{ best.prix }} crédits</strong> par <em>{{ best.user }}</em></div>
