@@ -10,7 +10,7 @@ import os
 app = Flask(__name__)
 app.secret_key = "clef_secrete_pour_session"
 
-# Configuration base de données : locale (SQLite) ou Render (PostgreSQL)
+# Base locale (SQLite) ou distante (Render PostgreSQL)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///local.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -23,7 +23,7 @@ allowed_usernames = ["Anon", "Gattaca", "PlaneteRouge", "Zone51", "BLR"]
 # 🗂️ Modèles de base de données
 # ---------------------------------------------------------
 class User(db.Model):
-    __tablename__ = "users"  # ✅ Correction explicite
+    __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
@@ -35,11 +35,16 @@ class User(db.Model):
 
 
 class Mission(db.Model):
-    __tablename__ = "missions"  # ✅ Correction explicite
+    __tablename__ = "missions"
     id = db.Column(db.Integer, primary_key=True)
     titre = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=False)
     prix = db.Column(db.Float, nullable=False)
+
+    # ✅ Champs ajoutés pour compatibilité avec la base Render
+    prix_achat = db.Column(db.Float)       # Ancienne colonne éventuelle
+    data_label = db.Column(db.String(50))  # Ancienne colonne éventuelle
+
     date_butoir = db.Column(db.String(50), nullable=False)
     quantity = db.Column(db.Integer, default=1)
     type = db.Column(db.String(50))
@@ -49,7 +54,7 @@ class Mission(db.Model):
 
 
 class Offer(db.Model):
-    __tablename__ = "offers"  # ✅ Correction explicite
+    __tablename__ = "offers"
     id = db.Column(db.Integer, primary_key=True)
     prix = db.Column(db.Float, nullable=False)
     accepted = db.Column(db.Boolean, default=False)
@@ -248,11 +253,8 @@ def delete_offer(mission_id):
 # 🚀 Lancement
 # ---------------------------------------------------------
 with app.app_context():
-    db.create_all()  # crée automatiquement les tables sur Render
-    print("✅ Tables créées sur la base Render (si elles n’existaient pas).")
+    db.create_all()
+    print("✅ Tables vérifiées ou créées dans la base Render.")
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-
