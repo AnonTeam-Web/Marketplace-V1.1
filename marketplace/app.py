@@ -244,6 +244,15 @@ def delete_offer(mission_id):
 
     return redirect(url_for("mission_detail", mission_id=mission_id))
 
+@app.route("/upgrade_db")
+def upgrade_db():
+    with db.engine.connect() as conn:
+        conn.execute(db.text("ALTER TABLE missions ADD COLUMN IF NOT EXISTS prix_achat FLOAT DEFAULT 0;"))
+        conn.execute(db.text("ALTER TABLE missions ADD COLUMN IF NOT EXISTS data_label TEXT;"))
+        conn.commit()
+    return "DB upgrade completed."
+
+
 # ---------------------------------------------------------
 # 🚀 Lancement
 # ---------------------------------------------------------
@@ -253,4 +262,5 @@ with app.app_context():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
