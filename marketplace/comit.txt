@@ -1,3 +1,0 @@
-git add requirements.txt Procfile runtime.txt .gitignore
-git commit -m "Add deployment files"
-git push
